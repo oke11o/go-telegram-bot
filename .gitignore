@@ -1,1 +1,4 @@
 .idea
+.env
+bot.sqlite
+test.sqlite
