@@ -134,3 +134,23 @@ from user where username=?`
 	}
 	return user, err
 }
+
+func (r *Repo) SaveSession(ctx context.Context, session model.Session) (model.Session, error) {
+	err := session.PrepareToSave()
+	if err != nil {
+		return session, fmt.Errorf("session.PrepareToSave() err: %w", err)
+	}
+	q := `insert into session (user_id,data,status,created_at,updated_at)
+values (:user_id,:data,:status,:created_at,:updated_at)`
+	raw, err := r.db.NamedExecContext(ctx, q, session)
+	if err != nil {
+		return session, fmt.Errorf("db.NamedExecContext() err: %w", err)
+	}
+	id, err := raw.LastInsertId()
+	if err != nil {
+		return session, fmt.Errorf("raw.LastInsertId() err: %w", err)
+	}
+	session.ID = id
+
+	return session, nil
+}

@@ -30,3 +30,7 @@ func (r *Repo) GetUserByUsername(ctx context.Context, username string) (model.Us
 func (r *Repo) SetUserIsManager(ctx context.Context, userID int64, isManager bool) error {
 	panic("implement mongo SetUserIsManager()")
 }
+
+func (r *Repo) SaveSession(ctx context.Context, session model.Session) (model.Session, error) {
+	panic("implement mongo SaveSession()")
+}

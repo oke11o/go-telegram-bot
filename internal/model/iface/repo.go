@@ -11,4 +11,5 @@ type Repo interface {
 	SaveUser(ctx context.Context, user model.User) (model.User, error)
 	SetUserIsManager(ctx context.Context, userID int64, isManager bool) error
 	GetUserByUsername(ctx context.Context, username string) (model.User, error)
+	SaveSession(ctx context.Context, session model.Session) (model.Session, error)
 }

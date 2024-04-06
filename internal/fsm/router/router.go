@@ -7,8 +7,9 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
-	"github.com/oke11o/go-telegram-bot/internal/fsm/echo"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/maintainer"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/session"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/tournament"
 	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
@@ -35,8 +36,11 @@ func (r *Router) GetMachine(ctx context.Context, user model.User, update tgbotap
 		if strings.HasPrefix(update.Message.Text, maintainer.RemoveAdminCommand) {
 			return maintainer.NewRemoveAdmin(r.deps), state, nil
 		}
+		if strings.HasPrefix(update.Message.Text, tournament.CreateTournamentCommand) {
+			return tournament.NewCreateTournament(r.deps), state, nil
+		}
 
-		return echo.New(r.deps), state, nil
+		return session.NewSessionMachine(r.deps), state, nil
 	}
 
 	return nil, state, fmt.Errorf("unknown state machine")

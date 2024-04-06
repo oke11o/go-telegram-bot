@@ -7,6 +7,7 @@ import (
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
+	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
 const CreateTournamentCommand = "/create"
@@ -30,17 +31,27 @@ func (s *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 		return ctx, smc, state, nil
 	}
 
-	// Создать сессию. Сохранить в сессию состояние, что мы находимся в процессе создания турнира и ждем название
+	ses := model.NewCreateTournamentSession(state.User.ID)
 
 	text := strings.TrimPrefix(state.Update.Message.Text, CreateTournamentCommand)
 	text = strings.TrimSpace(text)
 	if text == "" {
-		// Попросить пользователя ввести название турнира
+		ses.SetStatus(model.SessionCreateTournamentAskTitle)
+		_, err := s.deps.Repo.SaveSession(ctx, ses)
+		if err != nil {
+			return ctx, nil, state, fmt.Errorf("Repo.SaveSession() error: %w", err)
+		}
 
-		return ctx, nil, state, nil
+		smc := sender.NewSenderMachine(s.deps, state.Update.Message.Chat.ID, "Please type title of the tournament", 0)
+		return ctx, smc, state, nil
 	}
-	// Сохранить название турнира в сессию
-	// Попросить пользователя ввести дату начала турнира
+	ses.SetArg("title", text)
+	ses.SetStatus(model.SessionCreateTournamentAskDate)
+	_, err := s.deps.Repo.SaveSession(ctx, ses)
+	if err != nil {
+		return ctx, nil, state, fmt.Errorf("Repo.SaveSession() error: %w", err)
+	}
 
-	return ctx, nil, state, nil
+	smc := sender.NewSenderMachine(s.deps, state.Update.Message.Chat.ID, "Please type start date of the tournament", 0)
+	return ctx, smc, state, nil
 }

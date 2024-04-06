@@ -31,3 +31,27 @@ CREATE TABLE IF NOT EXISTS chat
     photo    VARCHAR,
     location VARCHAR
 );
+
+CREATE TABLE IF NOT EXISTS tournament
+(
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      VARCHAR NOT NULL,
+    date       VARCHAR NOT NULL,
+    status     VARCHAR NOT NULL,
+    created_by INTEGER NOT NULL,
+    created_at VARCHAR NOT NULL,
+    updated_at VARCHAR NOT NULL,
+    FOREIGN KEY (created_by) REFERENCES user (id)
+);
+
+CREATE TABLE IF NOT EXISTS session
+(
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    status     VARCHAR NOT NULL,
+    data       TEXT    NOT NULL,
+    created_at VARCHAR NOT NULL,
+    updated_at VARCHAR NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id)
+
+);
