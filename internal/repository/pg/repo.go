@@ -50,3 +50,7 @@ func (r *Repo) SaveTournament(ctx context.Context, tournament model.Tournament) 
 func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, error) {
 	panic("implement pg GetOpenedTournaments()")
 }
+
+func (r *Repo) AddPlayerToTournament(ctx context.Context, userID int64, tournamentID int64) error {
+	panic("implement pg AddPlayerToTournament()")
+}

@@ -3,6 +3,7 @@ package session
 import (
 	"context"
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/player"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/tournament"
 	"github.com/oke11o/go-telegram-bot/internal/model"
@@ -27,6 +28,8 @@ func (s *SessionMachine) Switch(ctx context.Context, state fsm.State) (context.C
 		scm = tournament.NewCreateTournamentSetTitle(s.deps)
 	case model.SessionCreateTournamentSetDate:
 		scm = tournament.NewCreateTournamenSetDate(s.deps)
+	case model.SessionJoinProcess:
+		scm = player.NewJoinChoose(s.deps)
 	default:
 		scm = sender.NewSenderMachine(s.deps, state.User.ID, "Choose action", 0)
 	}

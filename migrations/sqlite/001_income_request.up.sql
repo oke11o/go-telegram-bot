@@ -55,3 +55,13 @@ CREATE TABLE IF NOT EXISTS session
     updated_at VARCHAR NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );
+
+CREATE TABLE IF NOT EXISTS member
+(
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL,
+    tournament_id INTEGER NOT NULL,
+    created_at    VARCHAR NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (tournament_id) REFERENCES tournament (id)
+);

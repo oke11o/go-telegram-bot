@@ -213,3 +213,12 @@ func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, er
 	}
 	return tournaments, nil
 }
+
+func (r *Repo) AddPlayerToTournament(ctx context.Context, userID int64, tournamentID int64) error {
+	q := `insert into member (user_id,tournament_id,created_at) values (?,?,?)`
+	_, err := r.db.ExecContext(ctx, q, userID, tournamentID, time.Now().Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("db.ExecContext() err: %w", err)
+	}
+	return nil
+}

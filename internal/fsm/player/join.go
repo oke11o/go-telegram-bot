@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
+	"github.com/oke11o/go-telegram-bot/internal/model/iface"
 	"log/slog"
 	"strings"
 
@@ -14,6 +15,13 @@ import (
 )
 
 const JoinCommand = "/join"
+
+type tournamentMappingStr struct {
+	ID    int64  `json:"id"`
+	Title string `json:"title"`
+	Date  string `json:"date"`
+}
+type tournamentMapping map[int64]tournamentMappingStr
 
 func NewJoin(deps *fsm.Deps) *Join {
 	return &Join{
@@ -32,18 +40,14 @@ func (m *Join) Switch(ctx context.Context, state fsm.State) (context.Context, fs
 
 	state.Session = model.NewJoinSession(state.User.ID)
 
-	tours, err := m.Deps.Repo.GetOpenedTournaments(ctx)
-	tourMapping := make(map[int64]int64)
-	for i, tour := range tours {
-		tourMapping[int64(i+1)] = tour.ID
-	}
-	b, err := json.Marshal(tourMapping)
+	tours, tourMapping, err := getTournaments(ctx, m.Deps.Repo)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "json.Marshal error", slog.String("error", err.Error()), slog.Any("tourMapping", tourMapping))
-		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("cant json.Marshal() %s", state.User.Username))
+		m.Deps.Logger.ErrorContext(ctx, "cant get opened tournaments", slog.String("error", err.Error()))
+		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("cant get tournaments for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}
-	state.Session.SetArg("tourMapping", string(b))
+
+	state.Session.SetArg("tourMapping", tourMapping)
 	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
 		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
@@ -60,4 +64,24 @@ func (m *Join) Switch(ctx context.Context, state fsm.State) (context.Context, fs
 	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, text, 0)
 
 	return ctx, smc, state, nil
+}
+
+func getTournaments(ctx context.Context, repo iface.Repo) ([]model.Tournament, string, error) {
+	tours, err := repo.GetOpenedTournaments(ctx)
+	if err != nil {
+		return nil, "", fmt.Errorf("repo.GetOpenedTournaments() error: %w", err)
+	}
+	tourMapping := make(tournamentMapping)
+	for i, tour := range tours {
+		tourMapping[int64(i+1)] = tournamentMappingStr{
+			ID:    tour.ID,
+			Title: tour.Title,
+			Date:  tour.Date,
+		}
+	}
+	b, err := json.Marshal(tourMapping)
+	if err != nil {
+		return nil, "", fmt.Errorf("json.Marshal() error: %w", err)
+	}
+	return tours, string(b), err
 }
