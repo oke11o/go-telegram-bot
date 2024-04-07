@@ -46,3 +46,7 @@ func (r *Repo) GetSession(ctx context.Context, userID int64) (model.Session, err
 func (r *Repo) SaveTournament(ctx context.Context, tournament model.Tournament) (model.Tournament, error) {
 	panic("implement pg SaveTournament()")
 }
+
+func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, error) {
+	panic("implement pg GetOpenedTournaments()")
+}

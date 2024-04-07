@@ -198,3 +198,18 @@ values (:title,:date,:status,:created_by,:created_at,:updated_at)`
 
 	return tournament, nil
 }
+
+func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, error) {
+	q := `select id,title,date,status,created_by,created_at,updated_at from tournament where status in (?)`
+	q, args, err := sqlx.In(q, []model.TournamentStatus{model.TournamentStatusCreated, model.TournamentStatusInProgress})
+	if err != nil {
+		return nil, fmt.Errorf("sqlx.In() err: %w", err)
+	}
+	q = r.db.Rebind(q)
+	var tournaments []model.Tournament
+	err = r.db.SelectContext(ctx, &tournaments, q, args...)
+	if err != nil {
+		return nil, fmt.Errorf("db.SelectContext() err: %w", err)
+	}
+	return tournaments, nil
+}

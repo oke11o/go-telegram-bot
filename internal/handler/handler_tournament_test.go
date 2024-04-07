@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/oke11o/go-telegram-bot/internal/config"
-	"github.com/oke11o/go-telegram-bot/pgk/utils/str"
 	"log/slog"
 	"os"
 	"testing"
@@ -14,9 +12,11 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/oke11o/go-telegram-bot/internal/config"
 	"github.com/oke11o/go-telegram-bot/internal/model"
 	"github.com/oke11o/go-telegram-bot/internal/repository/sqlite"
 	"github.com/oke11o/go-telegram-bot/internal/service"
+	"github.com/oke11o/go-telegram-bot/pgk/utils/str"
 )
 
 type testSender struct {
@@ -213,7 +213,7 @@ func (s *Suite) TestHandler_JustText() {
 	s.Require().Equal("Admin", user.LastName)
 }
 
-func (s *Suite) TestHandler_Tournament() {
+func (s *Suite) TestHandler_CreateTournament() {
 	// arrange
 	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsMaintainer: true}
 	ctx := context.Background()
@@ -298,7 +298,7 @@ func (s *Suite) TestHandler_Tournament() {
 			assert: func(c tgbotapi.Chattable) {
 				msg, ok := c.(tgbotapi.MessageConfig)
 				s.Require().True(ok)
-				s.Require().Equal("Please text start date of the tournament", msg.Text)
+				s.Require().Equal("The tournament was successfully created", msg.Text) //TODO:
 			},
 		})
 		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
@@ -336,6 +336,51 @@ func (s *Suite) TestHandler_Tournament() {
 		s.Require().Equal("21.03.2024", tournament.Date)
 		s.Require().Equal(int64(111), tournament.CreatedBy)
 		s.Require().Equal(model.TournamentStatusCreated, tournament.Status)
+	})
+}
+
+func (s *Suite) TestHandler_ListTournament() {
+	// arrange
+	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsMaintainer: true}
+	ctx := context.Background()
+	_, err := s.repo.SaveUser(ctx, mainAdmin)
+	s.Require().NoError(err)
+	q := `insert into tournament (title,date,status,created_by,created_at,updated_at) 
+values ('tour1', '2024-03-21', 'created', 111, '2024-03-21 00:00:00', '2024-03-21 00:00:00'),
+       ('tour2', '2024-03-22', 'created', 111, '2024-03-22 00:00:00', '2024-03-22 00:00:00'),
+       ('tour3', '2024-03-23', 'in_progress', 111, '2024-03-23 00:00:00', '2024-03-23 00:00:00'),
+       ('tour4', '2024-03-24', 'finished', 111, '2024-03-24 00:00:00', '2024-03-24 00:00:00')
+`
+	_, err = s.dbx.Exec(q)
+	s.Require().NoError(err)
+
+	s.T().Run("/list command", func(t *testing.T) {
+		h := s.createHandler()
+		h.SetSender(testSender{
+			assert: func(c tgbotapi.Chattable) {
+				msg, ok := c.(tgbotapi.MessageConfig)
+				s.Require().True(ok)
+				s.Require().Equal(`List of opened tournaments:
+- tour1 [2024-03-21]
+- tour2 [2024-03-22]
+- tour3 [2024-03-23]`, msg.Text)
+			},
+		})
+		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
+			UpdateID: 1,
+			Message: &tgbotapi.Message{MessageID: 45,
+				From: &tgbotapi.User{ID: 111, FirstName: "Main", LastName: "Admin", UserName: "main_admin", LanguageCode: "en"},
+				Date: 1712312739,
+				Chat: &tgbotapi.Chat{ID: 111, Type: "private", UserName: "main_admin", FirstName: "Main", LastName: "Admin"},
+				Text: "/list"}, // Notice!!!
+		})
+		s.Require().NoError(err)
+
+		var incomes []model.IncomeRequest
+		q := `select * from income_request`
+		err = s.dbx.Select(&incomes, q)
+		s.Require().NoError(err)
+		s.Len(incomes, 1)
 	})
 }
 

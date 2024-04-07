@@ -57,5 +57,8 @@ func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
 	if strings.HasPrefix(update.Message.Text, tournament.CreateTournamentCommand) {
 		return tournament.NewCreateTournament(r.deps)
 	}
+	if strings.HasPrefix(update.Message.Text, tournament.ListTournamentCommand) {
+		return tournament.NewListTournament(r.deps)
+	}
 	return nil
 }

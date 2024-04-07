@@ -50,7 +50,7 @@ func (m *CreateTournamentAskDate) Switch(ctx context.Context, state fsm.State) (
 	tournament := model.NewTournament(title, date, state.User.ID)
 	tournament, err = m.deps.Repo.SaveTournament(ctx, tournament)
 	if err != nil {
-		smc := m.combineMachine(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save tournament for session %s", state.Session.ID))
+		smc := m.combineMachine(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save tournament for session %d", state.Session.ID))
 		return ctx, smc, state, nil
 	}
 
@@ -61,7 +61,7 @@ func (m *CreateTournamentAskDate) Switch(ctx context.Context, state fsm.State) (
 	}
 	state.Session.Closed = true
 
-	smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Please text start date of the tournament", 0)
+	smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "The tournament was successfully created", 0)
 	return ctx, smc, state, nil
 }
 
