@@ -64,5 +64,8 @@ func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
 	if strings.HasPrefix(update.Message.Text, player.JoinCommand) {
 		return player.NewJoin(r.deps)
 	}
+	if strings.HasPrefix(update.Message.Text, player.LeaveCommand) {
+		return player.NewLeave(r.deps)
+	}
 	return nil
 }

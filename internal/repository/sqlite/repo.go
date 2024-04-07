@@ -214,9 +214,28 @@ func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, er
 	return tournaments, nil
 }
 
+func (r *Repo) GetMemberTournaments(ctx context.Context, userID int64) ([]model.Tournament, error) {
+	q := `select t.id,t.title,t.date,t.status,t.created_by,t.created_at,t.updated_at from tournament t join member m on t.id=m.tournament_id where m.user_id=?`
+	var tournaments []model.Tournament
+	err := r.db.SelectContext(ctx, &tournaments, q, userID)
+	if err != nil {
+		return nil, fmt.Errorf("db.SelectContext() err: %w", err)
+	}
+	return tournaments, nil
+}
+
 func (r *Repo) AddPlayerToTournament(ctx context.Context, userID int64, tournamentID int64) error {
 	q := `insert into member (user_id,tournament_id,created_at) values (?,?,?)`
 	_, err := r.db.ExecContext(ctx, q, userID, tournamentID, time.Now().Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("db.ExecContext() err: %w", err)
+	}
+	return nil
+}
+
+func (r *Repo) RemovePlayerFromTournament(ctx context.Context, userID int64, tournamentID int64) error {
+	q := `delete from member where user_id=? and tournament_id=?`
+	_, err := r.db.ExecContext(ctx, q, userID, tournamentID)
 	if err != nil {
 		return fmt.Errorf("db.ExecContext() err: %w", err)
 	}

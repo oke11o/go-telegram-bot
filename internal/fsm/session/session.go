@@ -30,6 +30,8 @@ func (s *SessionMachine) Switch(ctx context.Context, state fsm.State) (context.C
 		scm = tournament.NewCreateTournamenSetDate(s.deps)
 	case model.SessionJoinProcess:
 		scm = player.NewJoinChoose(s.deps)
+	case model.SessionLeaveProcess:
+		scm = player.NewLeaveChoose(s.deps)
 	default:
 		scm = sender.NewSenderMachine(s.deps, state.User.ID, "Choose action", 0)
 	}

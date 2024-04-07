@@ -8,23 +8,23 @@ import (
 	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
-const JoinCommand = "/join"
+const LeaveCommand = "/leave"
 
-func NewJoin(deps *fsm.Deps) *Join {
-	return &Join{
+func NewLeave(deps *fsm.Deps) *Leave {
+	return &Leave{
 		Base: Base{Base: base.Base{Deps: deps}},
 	}
 }
 
-type Join struct {
+type Leave struct {
 	Base
 }
 
-func (m *Join) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
+func (m *Leave) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
 	if state.Update.Message == nil {
 		return ctx, nil, state, fmt.Errorf("unexpected part. ")
 	}
-	state.Session = model.NewJoinSession(state.User.ID)
+	state.Session = model.NewLeaveSession(state.User.ID)
 
-	return m.Base.JoinSwitch(ctx, state, "")
+	return m.Base.LeaveSwitch(ctx, state, "")
 }

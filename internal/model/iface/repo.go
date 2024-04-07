@@ -16,5 +16,7 @@ type Repo interface {
 	SaveTournament(ctx context.Context, tournament model.Tournament) (model.Tournament, error)
 	CloseSession(ctx context.Context, session model.Session) error
 	GetOpenedTournaments(ctx context.Context) ([]model.Tournament, error)
+	GetMemberTournaments(ctx context.Context, id int64) ([]model.Tournament, error)
 	AddPlayerToTournament(ctx context.Context, userID int64, tournamentID int64) error
+	RemovePlayerFromTournament(ctx context.Context, userID int64, tournamentID int64) error
 }

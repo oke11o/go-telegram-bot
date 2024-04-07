@@ -51,6 +51,14 @@ func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, er
 	panic("implement mongo GetOpenedTournaments()")
 }
 
+func (r *Repo) GetMemberTournaments(ctx context.Context, id int64) ([]model.Tournament, error) {
+	panic("implement mongo GetMemberTournaments()")
+}
+
 func (r *Repo) AddPlayerToTournament(ctx context.Context, userID int64, tournamentID int64) error {
 	panic("implement mongo AddPlayerToTournament()")
+}
+
+func (r *Repo) RemovePlayerFromTournament(ctx context.Context, userID int64, tournamentID int64) error {
+	panic("implement mongo RemovePlayerFromTournament()")
 }
