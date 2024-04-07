@@ -65,7 +65,7 @@ func (m *LeaveChoose) Switch(ctx context.Context, state fsm.State) (context.Cont
 		return ctx, smc, state, nil
 	}
 
-	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, fmt.Sprintf("You are successfully joined to the tournament `%s - %s`", mapping[choose].Title, mapping[choose].Date), 0)
+	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, fmt.Sprintf("You are successfully leave to the tournament `%s - %s`", mapping[choose].Title, mapping[choose].Date), 0)
 
 	return ctx, smc, state, nil
 }
