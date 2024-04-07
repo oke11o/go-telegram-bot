@@ -8,7 +8,7 @@ import (
 	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
-func NewCreateTournamentAskTitle(deps *fsm.Deps) *CreateTournamentAskTitle {
+func NewCreateTournamentSetTitle(deps *fsm.Deps) *CreateTournamentAskTitle {
 	return &CreateTournamentAskTitle{
 		deps: deps,
 	}
@@ -34,7 +34,7 @@ func (m *CreateTournamentAskTitle) Switch(ctx context.Context, state fsm.State) 
 		return ctx, smc, state, nil
 	}
 	state.Session.SetArg("title", text)
-	state.Session.SetStatus(model.SessionCreateTournamentAskDate)
+	state.Session.SetStatus(model.SessionCreateTournamentSetDate)
 	ses, err := m.deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
 		combineMachine := fsm.NewCombine(nil,

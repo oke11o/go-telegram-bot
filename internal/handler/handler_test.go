@@ -110,7 +110,6 @@ func (s *Suite) TestHandler_AddRemoveAdminCmd() {
 				s.Require().True(ok)
 				responseMessages = append(responseMessages, msg.Text)
 				responseIds = append(responseIds, msg.ChatID)
-				//s.Require().Equal("Successful give permisions to user target_user", msg.Text)
 			},
 		})
 		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
@@ -151,7 +150,6 @@ func (s *Suite) TestHandler_AddRemoveAdminCmd() {
 				s.Require().True(ok)
 				responseMessages = append(responseMessages, msg.Text)
 				responseIds = append(responseIds, msg.ChatID)
-				//s.Require().Equal("Successful give permisions to user target_user", msg.Text)
 			},
 		})
 		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
@@ -189,7 +187,7 @@ func (s *Suite) TestHandler_JustText() {
 		assert: func(c tgbotapi.Chattable) {
 			msg, ok := c.(tgbotapi.MessageConfig)
 			s.Require().True(ok)
-			s.Require().Equal("🤟", msg.Text)
+			s.Require().Equal("Choose action", msg.Text)
 		},
 	})
 	err := h.HandleUpdate(context.Background(), tgbotapi.Update{
@@ -213,6 +211,132 @@ func (s *Suite) TestHandler_JustText() {
 	err = s.dbx.Get(&user, q, "main_admin")
 	s.Require().NoError(err)
 	s.Require().Equal("Admin", user.LastName)
+}
+
+func (s *Suite) TestHandler_Tournament() {
+	// arrange
+	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsMaintainer: true}
+	ctx := context.Background()
+	_, err := s.repo.SaveUser(ctx, mainAdmin)
+	s.Require().NoError(err)
+
+	s.T().Run("choose tg command", func(t *testing.T) {
+		h := s.createHandler()
+		h.SetSender(testSender{
+			assert: func(c tgbotapi.Chattable) {
+				msg, ok := c.(tgbotapi.MessageConfig)
+				s.Require().True(ok)
+				s.Require().Equal("Please text title of the tournament", msg.Text)
+			},
+		})
+		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
+			UpdateID: 1,
+			Message: &tgbotapi.Message{MessageID: 45,
+				From: &tgbotapi.User{ID: 111, FirstName: "Main", LastName: "Admin", UserName: "main_admin", LanguageCode: "en"},
+				Date: 1712312739,
+				Chat: &tgbotapi.Chat{ID: 111, Type: "private", UserName: "main_admin", FirstName: "Main", LastName: "Admin"},
+				Text: "/create"}, // Notice!!!
+		})
+		s.Require().NoError(err)
+
+		var incomes []model.IncomeRequest
+		q := `select * from income_request`
+		err = s.dbx.Select(&incomes, q)
+		s.Require().NoError(err)
+		s.Len(incomes, 1)
+
+		var sessions []model.Session
+		q = `select * from session where user_id=?`
+		err = s.dbx.Select(&sessions, q, mainAdmin.ID)
+		s.Require().NoError(err)
+		s.Require().Len(sessions, 1)
+		s.Require().Equal(model.SessionCreateTournamentSetTitle, sessions[0].Status)
+		s.Require().Equal(int64(111), sessions[0].UserID)
+		s.Require().Equal("{}", sessions[0].Data)
+		s.Require().False(sessions[0].Closed)
+	})
+
+	s.T().Run("text title", func(t *testing.T) {
+		h := s.createHandler()
+		h.SetSender(testSender{
+			assert: func(c tgbotapi.Chattable) {
+				msg, ok := c.(tgbotapi.MessageConfig)
+				s.Require().True(ok)
+				s.Require().Equal("Please text start date of the tournament", msg.Text)
+			},
+		})
+		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
+			UpdateID: 1,
+			Message: &tgbotapi.Message{MessageID: 45,
+				From: &tgbotapi.User{ID: 111, FirstName: "Main", LastName: "Admin", UserName: "main_admin", LanguageCode: "en"},
+				Date: 1712312739,
+				Chat: &tgbotapi.Chat{ID: 111, Type: "private", UserName: "main_admin", FirstName: "Main", LastName: "Admin"},
+				Text: "My new tournament"}, // Notice!!!
+		})
+		s.Require().NoError(err)
+
+		var incomes []model.IncomeRequest
+		q := `select * from income_request`
+		err = s.dbx.Select(&incomes, q)
+		s.Require().NoError(err)
+		s.Len(incomes, 2)
+
+		var sessions []model.Session
+		q = `select * from session where user_id=? order by id asc`
+		err = s.dbx.Select(&sessions, q, mainAdmin.ID)
+		s.Require().NoError(err)
+		s.Require().Len(sessions, 2)
+		s.Require().Equal(model.SessionCreateTournamentSetDate, sessions[1].Status)
+		s.Require().Equal(int64(111), sessions[1].UserID)
+		s.Require().Equal(`{"title":"My new tournament"}`, sessions[1].Data)
+		s.Require().False(sessions[0].Closed)
+	})
+
+	s.T().Run("text date", func(t *testing.T) {
+		h := s.createHandler()
+		h.SetSender(testSender{
+			assert: func(c tgbotapi.Chattable) {
+				msg, ok := c.(tgbotapi.MessageConfig)
+				s.Require().True(ok)
+				s.Require().Equal("Please text start date of the tournament", msg.Text)
+			},
+		})
+		err = h.HandleUpdate(context.Background(), tgbotapi.Update{
+			UpdateID: 1,
+			Message: &tgbotapi.Message{MessageID: 45,
+				From: &tgbotapi.User{ID: 111, FirstName: "Main", LastName: "Admin", UserName: "main_admin", LanguageCode: "en"},
+				Date: 1712312739,
+				Chat: &tgbotapi.Chat{ID: 111, Type: "private", UserName: "main_admin", FirstName: "Main", LastName: "Admin"},
+				Text: "21.03.2024"}, // Notice!!!
+		})
+		s.Require().NoError(err)
+
+		var incomes []model.IncomeRequest
+		q := `select * from income_request`
+		err = s.dbx.Select(&incomes, q)
+		s.Require().NoError(err)
+		s.Len(incomes, 3)
+
+		var sessions []model.Session
+		q = `select * from session where user_id=? order by id asc`
+		err = s.dbx.Select(&sessions, q, mainAdmin.ID)
+		s.Require().NoError(err)
+		s.Require().Len(sessions, 3)
+		s.Require().Equal(model.SessionCreateTournamentSetDate, sessions[2].Status)
+		s.Require().Equal(int64(111), sessions[2].UserID)
+		s.Require().Equal(`{"date":"21.03.2024","title":"My new tournament"}`, sessions[2].Data)
+		s.Require().True(sessions[0].Closed)
+		s.Require().True(sessions[1].Closed)
+		s.Require().True(sessions[2].Closed)
+
+		var tournament model.Tournament
+		err = s.dbx.Get(&tournament, `select * from tournament where title=?`, "My new tournament")
+		s.Require().NoError(err)
+		s.Require().Equal("My new tournament", tournament.Title)
+		s.Require().Equal("21.03.2024", tournament.Date)
+		s.Require().Equal(int64(111), tournament.CreatedBy)
+		s.Require().Equal(model.TournamentStatusCreated, tournament.Status)
+	})
 }
 
 func (s *Suite) createHandler() *Handler {

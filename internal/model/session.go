@@ -10,8 +10,8 @@ type SessionStatus string
 
 const (
 	SessionCreateTournamentProcess  SessionStatus = "create_tournament_process"
-	SessionCreateTournamentAskTitle SessionStatus = "create_tournament_ask_title"
-	SessionCreateTournamentAskDate  SessionStatus = "create_tournament_ask_date"
+	SessionCreateTournamentSetTitle SessionStatus = "create_tournament_set_title"
+	SessionCreateTournamentSetDate  SessionStatus = "create_tournament_set_date"
 	SessionStatusClosed             SessionStatus = "closed"
 )
 
@@ -19,6 +19,7 @@ type Session struct {
 	ID        int64             `db:"id"`
 	UserID    int64             `db:"user_id"`
 	Data      string            `db:"data"`
+	Closed    bool              `db:"closed"`
 	dataArgs  map[string]string `db:"-"`
 	Status    SessionStatus     `db:"status"`
 	CreatedAt string            `db:"created_at"`
@@ -43,6 +44,10 @@ func (s *Session) SetStatus(status SessionStatus) {
 }
 
 func (s *Session) PrepareToSave() error {
+	if s.dataArgs == nil {
+		s.Data = "{}"
+		return nil
+	}
 	b, err := json.Marshal(s.dataArgs)
 	if err != nil {
 		return fmt.Errorf("json.Marshal() err: %w", err)

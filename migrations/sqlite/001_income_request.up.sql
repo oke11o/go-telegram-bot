@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS session
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id    INTEGER NOT NULL,
     status     VARCHAR NOT NULL,
+    closed     INTEGER NOT NULL DEFAULT 0,
     data       TEXT    NOT NULL,
     created_at VARCHAR NOT NULL,
     updated_at VARCHAR NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user (id)
-
 );

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -153,6 +154,15 @@ values (:user_id,:data,:status,:created_at,:updated_at)`
 	session.ID = id
 
 	return session, nil
+}
+
+func (r *Repo) CloseSession(ctx context.Context, session model.Session) error {
+	q := `update session set closed=1,updated_at=? where user_id=?`
+	_, err := r.db.ExecContext(ctx, q, time.Now().Format(time.RFC3339), session.UserID)
+	if err != nil {
+		return fmt.Errorf("db.ExecContext() err: %w", err)
+	}
+	return nil
 }
 
 func (r *Repo) GetSession(ctx context.Context, userID int64) (model.Session, error) {

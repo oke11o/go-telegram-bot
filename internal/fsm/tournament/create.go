@@ -33,10 +33,13 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 
 	ses := model.NewCreateTournamentSession(state.User.ID)
 
-	text := strings.TrimPrefix(state.Update.Message.Text, CreateTournamentCommand)
-	text = strings.TrimSpace(text)
+	split := strings.Split(state.Update.Message.Text, " ")
+	var text string
+	if len(split) > 1 {
+		text = strings.Join(split[1:], " ")
+	}
 	if text == "" {
-		ses.SetStatus(model.SessionCreateTournamentAskTitle)
+		ses.SetStatus(model.SessionCreateTournamentSetTitle)
 		_, err := m.deps.Repo.SaveSession(ctx, ses)
 		if err != nil {
 			combineMachine := fsm.NewCombine(nil,
@@ -50,7 +53,7 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 		return ctx, smc, state, nil
 	}
 	ses.SetArg("title", text)
-	ses.SetStatus(model.SessionCreateTournamentAskDate)
+	ses.SetStatus(model.SessionCreateTournamentSetDate)
 	_, err := m.deps.Repo.SaveSession(ctx, ses)
 	if err != nil {
 		combineMachine := fsm.NewCombine(nil,

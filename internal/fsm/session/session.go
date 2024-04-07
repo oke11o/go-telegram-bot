@@ -3,6 +3,9 @@ package session
 import (
 	"context"
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/tournament"
+	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
 func NewSessionMachine(deps *fsm.Deps) *SessionMachine {
@@ -16,10 +19,17 @@ type SessionMachine struct {
 }
 
 func (s *SessionMachine) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
-	// Получить сессию пользователя - она есть в state
-	// Сохранить сессию в state
-	// Под длинному switch определить нужную машину
-	// Если машину определить не удалость - вернуть ответ - выберете действие - или меню
+	var scm fsm.Machine
+	switch state.Session.Status {
+	case model.SessionCreateTournamentProcess:
+		scm = tournament.NewCreateTournament(s.deps)
+	case model.SessionCreateTournamentSetTitle:
+		scm = tournament.NewCreateTournamentSetTitle(s.deps)
+	case model.SessionCreateTournamentSetDate:
+		scm = tournament.NewCreateTournamenSetDate(s.deps)
+	default:
+		scm = sender.NewSenderMachine(s.deps, state.User.ID, "Choose action", 0)
+	}
 
-	return ctx, nil, state, nil
+	return ctx, scm, state, nil
 }

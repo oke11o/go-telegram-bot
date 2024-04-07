@@ -35,6 +35,10 @@ func (r *Repo) SaveSession(ctx context.Context, session model.Session) (model.Se
 	panic("implement mongo SaveSession()")
 }
 
+func (r *Repo) CloseSession(ctx context.Context, session model.Session) error {
+	panic("implement mongo CloseSession()")
+}
+
 func (r *Repo) GetSession(ctx context.Context, userID int64) (model.Session, error) {
 	panic("implement mongo GetSession()")
 }

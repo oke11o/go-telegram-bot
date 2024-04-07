@@ -14,4 +14,5 @@ type Repo interface {
 	SaveSession(ctx context.Context, session model.Session) (model.Session, error)
 	GetSession(ctx context.Context, userID int64) (model.Session, error)
 	SaveTournament(ctx context.Context, tournament model.Tournament) (model.Tournament, error)
+	CloseSession(ctx context.Context, session model.Session) error
 }

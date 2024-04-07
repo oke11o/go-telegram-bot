@@ -8,7 +8,7 @@ import (
 	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
-func NewCreateTournamentAskDate(deps *fsm.Deps) *CreateTournamentAskDate {
+func NewCreateTournamenSetDate(deps *fsm.Deps) *CreateTournamentAskDate {
 	return &CreateTournamentAskDate{
 		deps: deps,
 	}
@@ -54,13 +54,12 @@ func (m *CreateTournamentAskDate) Switch(ctx context.Context, state fsm.State) (
 		return ctx, smc, state, nil
 	}
 
-	state.Session.SetStatus(model.SessionStatusClosed)
-	ses, err = m.deps.Repo.SaveSession(ctx, state.Session)
+	err = m.deps.Repo.CloseSession(ctx, state.Session)
 	if err != nil {
 		smc := m.combineMachine(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session %d", state.Session.ID))
 		return ctx, smc, state, nil
 	}
-	state.Session = ses
+	state.Session.Closed = true
 
 	smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Please text start date of the tournament", 0)
 	return ctx, smc, state, nil
