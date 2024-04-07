@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"fmt"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/player"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -59,6 +60,9 @@ func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
 	}
 	if strings.HasPrefix(update.Message.Text, tournament.ListTournamentCommand) {
 		return tournament.NewListTournament(r.deps)
+	}
+	if strings.HasPrefix(update.Message.Text, player.JoinCommand) {
+		return player.NewJoin(r.deps)
 	}
 	return nil
 }

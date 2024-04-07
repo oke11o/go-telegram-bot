@@ -13,6 +13,8 @@ const (
 	SessionCreateTournamentSetTitle SessionStatus = "create_tournament_set_title"
 	SessionCreateTournamentSetDate  SessionStatus = "create_tournament_set_date"
 	SessionStatusClosed             SessionStatus = "closed"
+
+	SessionJoinProcess SessionStatus = "join_process"
 )
 
 type Session struct {
@@ -73,9 +75,17 @@ func (s *Session) AfterGet() error {
 }
 
 func NewCreateTournamentSession(userID int64) Session {
+	return newSession(userID, SessionCreateTournamentProcess)
+}
+
+func NewJoinSession(userID int64) Session {
+	return newSession(userID, SessionJoinProcess)
+}
+
+func newSession(userID int64, process SessionStatus) Session {
 	return Session{
 		UserID:    userID,
-		Status:    SessionCreateTournamentProcess,
+		Status:    process,
 		CreatedAt: time.Now().Format(time.RFC3339),
 		UpdatedAt: time.Now().Format(time.RFC3339),
 	}

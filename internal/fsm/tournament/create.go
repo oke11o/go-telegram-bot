@@ -3,6 +3,8 @@ package tournament
 import (
 	"context"
 	"fmt"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
+	"log/slog"
 	"strings"
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
@@ -14,12 +16,12 @@ const CreateTournamentCommand = "/create"
 
 func NewCreateTournament(deps *fsm.Deps) *CreateTournament {
 	return &CreateTournament{
-		deps: deps,
+		Base: base.Base{Deps: deps},
 	}
 }
 
 type CreateTournament struct {
-	deps *fsm.Deps
+	base.Base
 }
 
 func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
@@ -27,7 +29,7 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 		return ctx, nil, state, fmt.Errorf("unexpected part. ")
 	}
 	if !state.User.IsManager && !state.User.IsMaintainer {
-		smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "You dont have enough permissions for this action.", 0)
+		smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, "You dont have enough permissions for this action.", 0)
 		return ctx, smc, state, nil
 	}
 
@@ -40,29 +42,25 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 	}
 	if text == "" {
 		ses.SetStatus(model.SessionCreateTournamentSetTitle)
-		_, err := m.deps.Repo.SaveSession(ctx, ses)
+		_, err := m.Deps.Repo.SaveSession(ctx, ses)
 		if err != nil {
-			combineMachine := fsm.NewCombine(nil,
-				sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Something wrong. Try again latter", 0),
-				sender.NewSenderMachine(m.deps, m.deps.Cfg.MaintainerChatID, fmt.Sprintf("Cant save session fog user %s", state.User.Username), 0),
-			)
-			return ctx, combineMachine, state, nil
+			m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+			smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
+			return ctx, smc, state, nil
 		}
 
-		smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Please text title of the tournament", 0)
+		smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, "Please text title of the tournament", 0)
 		return ctx, smc, state, nil
 	}
 	ses.SetArg("title", text)
 	ses.SetStatus(model.SessionCreateTournamentSetDate)
-	_, err := m.deps.Repo.SaveSession(ctx, ses)
+	_, err := m.Deps.Repo.SaveSession(ctx, ses)
 	if err != nil {
-		combineMachine := fsm.NewCombine(nil,
-			sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Something wrong. Try again latter", 0),
-			sender.NewSenderMachine(m.deps, m.deps.Cfg.MaintainerChatID, fmt.Sprintf("Cant save session fog user %s", state.User.Username), 0),
-		)
-		return ctx, combineMachine, state, nil
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
+		return ctx, smc, state, nil
 	}
 
-	smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Please text start date of the tournament", 0)
+	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, "Please text start date of the tournament", 0)
 	return ctx, smc, state, nil
 }

@@ -3,6 +3,8 @@ package tournament
 import (
 	"context"
 	"fmt"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
+	"log/slog"
 	"strings"
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
@@ -14,12 +16,12 @@ const ListTournamentCommand = "/list"
 
 func NewListTournament(deps *fsm.Deps) *ListTournament {
 	return &ListTournament{
-		deps: deps,
+		Base: base.Base{Deps: deps},
 	}
 }
 
 type ListTournament struct {
-	deps *fsm.Deps
+	base.Base
 }
 
 func (m *ListTournament) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
@@ -27,17 +29,15 @@ func (m *ListTournament) Switch(ctx context.Context, state fsm.State) (context.C
 		return ctx, nil, state, fmt.Errorf("unexpected part. ")
 	}
 
-	tournaments, err := m.deps.Repo.GetOpenedTournaments(ctx)
+	tournaments, err := m.Deps.Repo.GetOpenedTournaments(ctx)
 	if err != nil {
-		combineMachine := fsm.NewCombine(nil,
-			sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, "Something wrong. Try again latter", 0),
-			sender.NewSenderMachine(m.deps, m.deps.Cfg.MaintainerChatID, fmt.Sprintf("Cant get tournament list"), 0),
-		)
+		m.Deps.Logger.ErrorContext(ctx, "Cant GetOpenedTournaments", slog.String("error", err.Error()))
+		combineMachine := m.CombineSenderMachines(state, "Something wrong. Try again latter", "Cant get tournament list")
 		return ctx, combineMachine, state, nil
 	}
 	text := m.PrintTournaments(tournaments)
 
-	smc := sender.NewSenderMachine(m.deps, state.Update.Message.Chat.ID, text, 0)
+	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, text, 0)
 	return ctx, smc, state, nil
 }
 
