@@ -27,11 +27,17 @@ type Session struct {
 }
 
 func (s *Session) GetArg(key string) (string, bool) {
+	if s.dataArgs == nil {
+		return "", false
+	}
 	value, ok := s.dataArgs[key]
 	return value, ok
 }
 
 func (s *Session) SetArg(key string, value string) {
+	if s.dataArgs == nil {
+		s.dataArgs = make(map[string]string)
+	}
 	s.dataArgs[key] = value
 }
 
