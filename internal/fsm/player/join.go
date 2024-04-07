@@ -30,7 +30,7 @@ func (m *Join) Switch(ctx context.Context, state fsm.State) (context.Context, fs
 		return ctx, nil, state, fmt.Errorf("unexpected part. ")
 	}
 
-	ses := model.NewJoinSession(state.User.ID)
+	state.Session = model.NewJoinSession(state.User.ID)
 
 	tours, err := m.Deps.Repo.GetOpenedTournaments(ctx)
 	tourMapping := make(map[int64]int64)
@@ -43,20 +43,19 @@ func (m *Join) Switch(ctx context.Context, state fsm.State) (context.Context, fs
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("cant json.Marshal() %s", state.User.Username))
 		return ctx, smc, state, nil
 	}
-	ses.SetArg("tourMapping", string(b))
-	ses, err = m.Deps.Repo.SaveSession(ctx, state.Session)
+	state.Session.SetArg("tourMapping", string(b))
+	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
 		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 		return ctx, smc, state, nil //fmt.Errorf("repo.SaveSession() error: %w", err)
 	}
-	state.Session = ses
 
 	toursTexts := make([]string, 0, len(tours))
 	for i, tour := range tours {
 		toursTexts = append(toursTexts, fmt.Sprintf("%d. %s [%s]", i+1, tour.Title, tour.Date))
 	}
-	text := "For with tournament you want to join?\n" + strings.Join(toursTexts, "\n")
+	text := "For which tournament you want to join?\n" + strings.Join(toursTexts, "\n")
 
 	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, text, 0)
 

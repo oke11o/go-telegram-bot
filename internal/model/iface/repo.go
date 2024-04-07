@@ -12,7 +12,7 @@ type Repo interface {
 	SetUserIsManager(ctx context.Context, userID int64, isManager bool) error
 	GetUserByUsername(ctx context.Context, username string) (model.User, error)
 	SaveSession(ctx context.Context, session model.Session) (model.Session, error)
-	GetSession(ctx context.Context, userID int64) (model.Session, error)
+	GetOpenedSession(ctx context.Context, userID int64) (model.Session, error)
 	SaveTournament(ctx context.Context, tournament model.Tournament) (model.Tournament, error)
 	CloseSession(ctx context.Context, session model.Session) error
 	GetOpenedTournaments(ctx context.Context) ([]model.Tournament, error)

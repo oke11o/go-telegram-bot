@@ -29,9 +29,9 @@ func (r *Router) GetMachine(ctx context.Context, user model.User, update tgbotap
 		User:   user,
 		Update: update,
 	}
-	ses, err := r.deps.Repo.GetSession(ctx, user.ID)
+	ses, err := r.deps.Repo.GetOpenedSession(ctx, user.ID)
 	if err != nil {
-		return nil, state, fmt.Errorf("repo.GetSession(%d) err: %w", user.ID, err)
+		return nil, state, fmt.Errorf("repo.GetOpenedSession(%d) err: %w", user.ID, err)
 	}
 	state.Session = ses
 

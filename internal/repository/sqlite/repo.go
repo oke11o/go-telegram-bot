@@ -165,9 +165,9 @@ func (r *Repo) CloseSession(ctx context.Context, session model.Session) error {
 	return nil
 }
 
-func (r *Repo) GetSession(ctx context.Context, userID int64) (model.Session, error) {
+func (r *Repo) GetOpenedSession(ctx context.Context, userID int64) (model.Session, error) {
 	ses := model.Session{}
-	q := `select id,user_id,data,status,created_at,updated_at from session where user_id=? order by id desc limit 1`
+	q := `select id,user_id,data,status,created_at,updated_at from session where user_id=? and closed=0 order by id desc limit 1`
 	err := r.db.GetContext(ctx, &ses, q, userID)
 	if err == nil {
 		err = ses.AfterGet()
