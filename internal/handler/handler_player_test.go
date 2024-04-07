@@ -64,7 +64,9 @@ values (101,'tour1', '2024-03-21', 'created', 111, '2024-03-21 00:00:00', '2024-
 			assert: func(c tgbotapi.Chattable) {
 				msg, ok := c.(tgbotapi.MessageConfig)
 				s.Require().True(ok)
-				s.Require().Equal(`Sorry, I got wrong answer.
+				s.Require().Equal(`Invalid input `+"`whaaaaat???`"+`
+Choose one of:
+
 For which tournament you want to join?
 1. tour1 [2024-03-21]
 2. tour2 [2024-03-22]
@@ -89,11 +91,11 @@ For which tournament you want to join?
 		var sessions []model.Session
 		err = s.dbx.Select(&sessions, `select * from session where user_id=20 order by id asc`)
 		s.Require().NoError(err)
-		s.Require().Len(sessions, 1)
-		s.Require().Equal(model.SessionJoinProcess, sessions[0].Status)
-		s.Require().Equal(int64(20), sessions[0].UserID)
-		s.Require().Equal(`{"tourMapping":"{\"1\":{\"id\":101,\"title\":\"tour1\",\"date\":\"2024-03-21\"},\"2\":{\"id\":102,\"title\":\"tour2\",\"date\":\"2024-03-22\"},\"3\":{\"id\":103,\"title\":\"tour3\",\"date\":\"2024-03-23\"}}"}`, sessions[0].Data)
-		s.Require().False(sessions[0].Closed)
+		s.Require().Len(sessions, 2)
+		s.Require().Equal(model.SessionJoinProcess, sessions[1].Status)
+		s.Require().Equal(int64(20), sessions[1].UserID)
+		s.Require().Equal(`{"tourMapping":"{\"1\":{\"id\":101,\"title\":\"tour1\",\"date\":\"2024-03-21\"},\"2\":{\"id\":102,\"title\":\"tour2\",\"date\":\"2024-03-22\"},\"3\":{\"id\":103,\"title\":\"tour3\",\"date\":\"2024-03-23\"}}"}`, sessions[1].Data)
+		s.Require().False(sessions[1].Closed)
 	})
 
 }

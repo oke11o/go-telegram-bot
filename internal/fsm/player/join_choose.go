@@ -15,12 +15,12 @@ import (
 
 func NewJoinChoose(deps *fsm.Deps) *JoinChoose {
 	return &JoinChoose{
-		Base: base.Base{Deps: deps},
+		Base: Base{Base: base.Base{Deps: deps}},
 	}
 }
 
 type JoinChoose struct {
-	base.Base
+	Base
 }
 
 func (m *JoinChoose) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
@@ -29,21 +29,19 @@ func (m *JoinChoose) Switch(ctx context.Context, state fsm.State) (context.Conte
 	}
 	tourMapping, ok := state.Session.GetArg("tourMapping")
 	if !ok {
-		// TODO: FirstStep Join again
-
+		return m.Base.DefaultSwitch(ctx, state, "Something wrong\nPlease try again\n\n")
 	}
 	var mapping tournamentMapping
 	err := json.Unmarshal([]byte(tourMapping), &mapping)
 	if err != nil {
-		// TODO: FirstStep Join again
-
+		return m.Base.DefaultSwitch(ctx, state, "Something wrong\nPlease try again\n\n")
 	}
 	choose, err := strconv.ParseInt(strings.TrimSpace(state.Update.Message.Text), 10, 64)
 	if err != nil {
-		//TODO: FirstStep Join again
+		return m.Base.DefaultSwitch(ctx, state, fmt.Sprintf("Invalid input `%s`\nChoose one of:\n\n", state.Update.Message.Text))
 	}
 	if _, ok := mapping[choose]; !ok {
-		//TODO: FirstStep Join again
+		return m.Base.DefaultSwitch(ctx, state, fmt.Sprintf("Invalid input `%s`\nChoose one of:\n\n", state.Update.Message.Text))
 	}
 	state.Session.SetArg("choose", strconv.FormatInt(choose, 10))
 	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
