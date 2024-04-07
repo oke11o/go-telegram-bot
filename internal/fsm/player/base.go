@@ -55,7 +55,7 @@ func (m *Base) defaultSwitch(ctx context.Context, state fsm.State, errorMessage 
 	for i, tour := range tours {
 		toursTexts = append(toursTexts, fmt.Sprintf("%d. %s [%s]", i+1, tour.Title, tour.Date))
 	}
-	text := fmt.Sprintf("%sFor which tournament you want to %s?\n%s", errorMessage, verb, strings.Join(toursTexts, "\n"))
+	text := fmt.Sprintf("%sWhich tournament you want to %s?\n%s", errorMessage, verb, strings.Join(toursTexts, "\n"))
 
 	smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, text, 0)
 
