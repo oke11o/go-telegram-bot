@@ -51,6 +51,16 @@ func (s *Session) PrepareToSave() error {
 	return nil
 }
 
+func (s *Session) AfterGet() error {
+	var data map[string]string
+	err := json.Unmarshal([]byte(s.Data), &data)
+	if err != nil {
+		return fmt.Errorf("json.Unmarshal() err: %w", err)
+	}
+	s.dataArgs = data
+	return nil
+}
+
 func NewCreateTournamentSession(userID int64) Session {
 	return Session{
 		UserID:    userID,

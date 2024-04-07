@@ -16,7 +16,7 @@ type SessionMachine struct {
 }
 
 func (s *SessionMachine) Switch(ctx context.Context, state fsm.State) (context.Context, fsm.Machine, fsm.State, error) {
-	// Получить сессию пользователя
+	// Получить сессию пользователя - она есть в state
 	// Сохранить сессию в state
 	// Под длинному switch определить нужную машину
 	// Если машину определить не удалость - вернуть ответ - выберете действие - или меню

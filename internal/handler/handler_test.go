@@ -70,12 +70,7 @@ func (s *Suite) TestHandler_AddRemoveAdminCmd() {
 	s.Require().NoError(err)
 
 	s.T().Run("cant find user", func(t *testing.T) {
-		income := service.NewIncomeServce(s.repo)
-		h := &Handler{
-			logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-			income: income,
-			repo:   s.repo,
-		}
+		h := s.createHandler()
 		h.SetSender(testSender{
 			assert: func(c tgbotapi.Chattable) {
 				msg, ok := c.(tgbotapi.MessageConfig)
@@ -106,12 +101,7 @@ func (s *Suite) TestHandler_AddRemoveAdminCmd() {
 	})
 
 	s.T().Run("successful find user", func(t *testing.T) {
-		income := service.NewIncomeServce(s.repo)
-		h := &Handler{
-			logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-			income: income,
-			repo:   s.repo,
-		}
+		h := s.createHandler()
 		responseMessages := []string{}
 		responseIds := []int64{}
 		h.SetSender(testSender{
@@ -152,12 +142,7 @@ func (s *Suite) TestHandler_AddRemoveAdminCmd() {
 	})
 
 	s.T().Run("successful remove manager permissions user", func(t *testing.T) {
-		income := service.NewIncomeServce(s.repo)
-		h := &Handler{
-			logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-			income: income,
-			repo:   s.repo,
-		}
+		h := s.createHandler()
 		responseMessages := []string{}
 		responseIds := []int64{}
 		h.SetSender(testSender{
@@ -199,11 +184,7 @@ func (s *Suite) TestHandler_AddRemoveAdminCmd() {
 }
 
 func (s *Suite) TestHandler_JustText() {
-	income := service.NewIncomeServce(s.repo)
-	h := &Handler{
-		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-		income: income,
-	}
+	h := s.createHandler()
 	h.SetSender(testSender{
 		assert: func(c tgbotapi.Chattable) {
 			msg, ok := c.(tgbotapi.MessageConfig)
@@ -232,4 +213,15 @@ func (s *Suite) TestHandler_JustText() {
 	err = s.dbx.Get(&user, q, "main_admin")
 	s.Require().NoError(err)
 	s.Require().Equal("Admin", user.LastName)
+}
+
+func (s *Suite) createHandler() *Handler {
+	income := service.NewIncomeServce(s.repo)
+	h := &Handler{
+		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
+		income: income,
+		repo:   s.repo,
+		cfg:    s.cfg,
+	}
+	return h
 }

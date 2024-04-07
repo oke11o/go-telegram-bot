@@ -14,6 +14,7 @@ type Suite struct {
 	dbx   *sqlx.DB
 	repo  *sqlite.Repo
 	dbCfg config.SqliteConfig
+	cfg   config.Config
 }
 
 func (s *Suite) createDB(cfg config.SqliteConfig) (*sqlx.DB, error) {

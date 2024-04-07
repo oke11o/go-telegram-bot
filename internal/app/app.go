@@ -42,6 +42,6 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("unknown db_type %s", cfg.DBType)
 	}
 	income := service.NewIncomeServce(repo)
-	b := bot.NewBot(cfg, l, handler2.New(l, income, repo))
+	b := bot.NewBot(cfg, l, handler2.New(cfg, l, income, repo))
 	return b.Run(ctx)
 }

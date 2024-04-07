@@ -34,3 +34,11 @@ func (r *Repo) SetUserIsManager(ctx context.Context, userID int64, isManager boo
 func (r *Repo) SaveSession(ctx context.Context, session model.Session) (model.Session, error) {
 	panic("implement mongo SaveSession()")
 }
+
+func (r *Repo) GetSession(ctx context.Context, userID int64) (model.Session, error) {
+	panic("implement mongo GetSession()")
+}
+
+func (r *Repo) SaveTournament(ctx context.Context, tournament model.Tournament) (model.Tournament, error) {
+	panic("implement mongo SaveTournament()")
+}

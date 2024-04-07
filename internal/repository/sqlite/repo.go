@@ -154,3 +154,37 @@ values (:user_id,:data,:status,:created_at,:updated_at)`
 
 	return session, nil
 }
+
+func (r *Repo) GetSession(ctx context.Context, userID int64) (model.Session, error) {
+	ses := model.Session{}
+	q := `select id,user_id,data,status,created_at,updated_at from session where user_id=? order by id desc limit 1`
+	err := r.db.GetContext(ctx, &ses, q, userID)
+	if err == nil {
+		err = ses.AfterGet()
+		if err != nil {
+			return ses, fmt.Errorf("session.AfterGet() err: %w", err)
+		}
+		return ses, nil
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		return ses, nil
+	}
+
+	return ses, fmt.Errorf("db.GetContext() err: %w", err)
+}
+
+func (r *Repo) SaveTournament(ctx context.Context, tournament model.Tournament) (model.Tournament, error) {
+	q := `insert into tournament (title,date,status,created_by,created_at,updated_at)
+values (:title,:date,:status,:created_by,:created_at,:updated_at)`
+	raw, err := r.db.NamedExecContext(ctx, q, tournament)
+	if err != nil {
+		return tournament, fmt.Errorf("db.NamedExecContext() err: %w", err)
+	}
+	id, err := raw.LastInsertId()
+	if err != nil {
+		return tournament, fmt.Errorf("raw.LastInsertId() err: %w", err)
+	}
+	tournament.ID = id
+
+	return tournament, nil
+}

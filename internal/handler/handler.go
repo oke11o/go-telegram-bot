@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/oke11o/go-telegram-bot/internal/config"
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/router"
 	"log/slog"
@@ -19,8 +20,9 @@ type incomer interface {
 	Income(ctx context.Context, requestID string, update tgbotapi.Update) (model.User, error)
 }
 
-func New(l *slog.Logger, income incomer, repo iface.Repo) *Handler {
+func New(cfg config.Config, l *slog.Logger, income incomer, repo iface.Repo) *Handler {
 	return &Handler{
+		cfg:    cfg,
 		logger: l,
 		income: income,
 		repo:   repo,
@@ -32,6 +34,7 @@ type Handler struct {
 	sender iface.Sender
 	income incomer
 	repo   iface.Repo
+	cfg    config.Config
 }
 
 func (h *Handler) SetSender(sender iface.Sender) {
@@ -49,7 +52,7 @@ func (h *Handler) HandleUpdate(ctx context.Context, update tgbotapi.Update) erro
 	}
 	ctx = logger.AppendCtx(ctx, slog.Int64("user_id", user.ID))
 
-	deps := fsm.NewDeps(h.repo, h.sender, h.logger)
+	deps := fsm.NewDeps(h.cfg, h.repo, h.sender, h.logger)
 	routr, err := router.NewRouter(deps)
 	if err != nil {
 		h.logger.ErrorContext(ctx, "fsm.NewRouter Error", err)
