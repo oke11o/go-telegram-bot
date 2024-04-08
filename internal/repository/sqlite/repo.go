@@ -199,6 +199,7 @@ values (:title,:date,:status,:created_by,:created_at,:updated_at)`
 	return tournament, nil
 }
 
+// TODO: skip user paramater. If skipUser!=0, then filter result from member table where user_id!=skipUser
 func (r *Repo) GetOpenedTournaments(ctx context.Context) ([]model.Tournament, error) {
 	q := `select id,title,date,status,created_by,created_at,updated_at from tournament where status in (?)`
 	q, args, err := sqlx.In(q, []model.TournamentStatus{model.TournamentStatusCreated, model.TournamentStatusInProgress})

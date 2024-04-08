@@ -42,6 +42,16 @@ func (m *Base) defaultSwitch(ctx context.Context, state fsm.State, errorMessage 
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("cant get tournaments for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}
+	if len(tours) == 0 {
+		err := m.Deps.Repo.CloseSession(ctx, state.Session)
+		if err != nil {
+			m.Deps.Logger.ErrorContext(ctx, "Cant close session", slog.String("error", err.Error()))
+			smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant close session for user %s", state.User.Username))
+			return ctx, smc, state, nil
+		}
+		smc := m.CombineSenderMachines(state, "There are no opened tournaments", "")
+		return ctx, smc, state, nil
+	}
 
 	state.Session.SetArg("tourMapping", tourMapping)
 	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
