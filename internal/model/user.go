@@ -12,7 +12,7 @@ type User struct {
 	LastName     string `db:"last_name"`
 	LanguageCode string `db:"language_code"`
 	IsBot        bool   `db:"is_bot"`
-	IsMaintainer bool   `db:"is_maintainer"`
+	IsMaintainer bool   `db:"is_maintainer"` // TODO: remove from db
 	IsManager    bool   `db:"is_manager"`
 }
 

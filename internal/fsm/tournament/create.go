@@ -28,7 +28,7 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 	if state.Update.Message == nil {
 		return ctx, nil, state, fmt.Errorf("unexpected part. ")
 	}
-	if !state.User.IsManager && !state.User.IsMaintainer {
+	if !state.User.IsManager {
 		smc := sender.NewSenderMachine(m.Deps, state.Update.Message.Chat.ID, "You dont have enough permissions for this action.", 0)
 		return ctx, smc, state, nil
 	}
