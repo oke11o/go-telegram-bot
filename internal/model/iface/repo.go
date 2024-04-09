@@ -19,4 +19,5 @@ type Repo interface {
 	GetMemberTournaments(ctx context.Context, id int64) ([]model.Tournament, error)
 	AddPlayerToTournament(ctx context.Context, userID int64, tournamentID int64) error
 	RemovePlayerFromTournament(ctx context.Context, userID int64, tournamentID int64) error
+	GetTournamentsPlayers(ctx context.Context, tournamentID int64) ([]model.User, error)
 }

@@ -39,6 +39,7 @@ func TestSuite(t *testing.T) {
 func (s *Suite) SetupSuite() {}
 
 func (s *Suite) SetupTest() {
+	s.cfg.MaintainerChatID = 111
 	s.dbCfg = config.SqliteConfig{
 		File:          fmt.Sprintf("../../tests/db/test-%s.sqlite", str.RandStringRunes(8, "")),
 		MigrationPath: "../../migrations/sqlite",
@@ -215,7 +216,7 @@ func (s *Suite) TestHandler_JustText() {
 
 func (s *Suite) TestHandler_CreateTournament() {
 	// arrange
-	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsMaintainer: true}
+	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsManager: true}
 	ctx := context.Background()
 	_, err := s.repo.SaveUser(ctx, mainAdmin)
 	s.Require().NoError(err)
@@ -341,7 +342,7 @@ func (s *Suite) TestHandler_CreateTournament() {
 
 func (s *Suite) TestHandler_ListTournament() {
 	// arrange
-	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsMaintainer: true}
+	mainAdmin := model.User{ID: 111, Username: "main_admin", FirstName: "Main", LastName: "Admin", LanguageCode: "en", IsManager: true}
 	ctx := context.Background()
 	_, err := s.repo.SaveUser(ctx, mainAdmin)
 	s.Require().NoError(err)

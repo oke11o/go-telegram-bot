@@ -242,3 +242,17 @@ func (r *Repo) RemovePlayerFromTournament(ctx context.Context, userID int64, tou
 	}
 	return nil
 }
+
+func (r *Repo) GetTournamentsPlayers(ctx context.Context, tournamentID int64) ([]model.User, error) {
+	q := `select u.id,u.username,u.first_name,u.last_name,u.language_code,u.is_bot,u.is_maintainer,u.is_manager
+from member m
+         left join tournament t on m.tournament_id = t.id
+         left join user u on m.user_id = u.id
+where m.tournament_id = ?`
+	var users []model.User
+	err := r.db.SelectContext(ctx, &users, q, tournamentID)
+	if err != nil {
+		return nil, fmt.Errorf("db.SelectContext() err: %w", err)
+	}
+	return users, nil
+}

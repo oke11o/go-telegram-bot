@@ -3,16 +3,19 @@ package router
 import (
 	"context"
 	"fmt"
-	"github.com/oke11o/go-telegram-bot/internal/fsm/player"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/help"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/maintainer"
+	"github.com/oke11o/go-telegram-bot/internal/fsm/player"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/session"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/tournament"
 	"github.com/oke11o/go-telegram-bot/internal/model"
 )
+
+const StartCommand = "/start"
 
 type Router struct {
 	deps *fsm.Deps
@@ -49,6 +52,9 @@ func (r *Router) GetMachine(ctx context.Context, user model.User, update tgbotap
 }
 
 func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
+	if strings.HasPrefix(update.Message.Text, help.HelpCommand) || strings.HasPrefix(update.Message.Text, StartCommand) {
+		return help.NewHelp(r.deps)
+	}
 	if strings.HasPrefix(update.Message.Text, maintainer.AddAdminCommand) {
 		return maintainer.NewAddAdmin(r.deps)
 	}
@@ -66,6 +72,9 @@ func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
 	}
 	if strings.HasPrefix(update.Message.Text, player.LeaveCommand) {
 		return player.NewLeave(r.deps)
+	}
+	if strings.HasPrefix(update.Message.Text, player.MembersCommand) {
+		return player.NewMembers(r.deps)
 	}
 	return nil
 }

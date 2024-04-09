@@ -62,3 +62,7 @@ func (r *Repo) AddPlayerToTournament(ctx context.Context, userID int64, tourname
 func (r *Repo) RemovePlayerFromTournament(ctx context.Context, userID int64, tournamentID int64) error {
 	panic("implement pg RemovePlayerFromTournament()")
 }
+
+func (r *Repo) GetTournamentsPlayers(ctx context.Context, tournamentID int64) ([]model.User, error) {
+	panic("implement pg GetTournamentsPlayers()")
+}

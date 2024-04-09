@@ -14,8 +14,9 @@ const (
 	SessionCreateTournamentSetDate  SessionStatus = "create_tournament_set_date"
 	SessionStatusClosed             SessionStatus = "closed"
 
-	SessionJoinProcess  SessionStatus = "join_process"
-	SessionLeaveProcess SessionStatus = "leave_process"
+	SessionJoinProcess    SessionStatus = "join_process"
+	SessionLeaveProcess   SessionStatus = "leave_process"
+	SessionMembersProcess SessionStatus = "members_process"
 )
 
 type Session struct {
@@ -85,6 +86,10 @@ func NewJoinSession(userID int64) Session {
 
 func NewLeaveSession(userID int64) Session {
 	return newSession(userID, SessionLeaveProcess)
+}
+
+func NewMembersSession(userID int64) Session {
+	return newSession(userID, SessionMembersProcess)
 }
 
 func newSession(userID int64, process SessionStatus) Session {
