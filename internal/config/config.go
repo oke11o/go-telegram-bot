@@ -32,5 +32,5 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, fmt.Errorf("envconfig.Process err: %s", err)
 	}
-	return cfg, fmt.Errorf("asdf")
+	return cfg, nil
 }
