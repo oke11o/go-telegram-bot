@@ -59,7 +59,7 @@ func (s *Admin) changeManagerPermissions(
 	if state.Update.Message == nil {
 		return ctx, nil, state, fmt.Errorf("unexpected part. ")
 	}
-	if !state.User.IsMaintainer {
+	if s.deps.Cfg.MaintainerChatID == state.User.ID && !state.User.IsMaintainer {
 		smc := sender.NewSenderMachine(s.deps, state.Update.Message.Chat.ID, "You dont have enough permissions for this action.", 0)
 		return ctx, smc, state, nil
 	}
