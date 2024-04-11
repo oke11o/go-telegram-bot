@@ -9,6 +9,8 @@ import (
 type SessionStatus string
 
 const (
+	SessionStartTournamentProcess   SessionStatus = "start_tournament_process"
+	SessionFinishTournamentProcess  SessionStatus = "finish_tournament_process"
 	SessionCreateTournamentProcess  SessionStatus = "create_tournament_process"
 	SessionCreateTournamentSetTitle SessionStatus = "create_tournament_set_title"
 	SessionCreateTournamentSetDate  SessionStatus = "create_tournament_set_date"
@@ -78,6 +80,14 @@ func (s *Session) AfterGet() error {
 
 func NewCreateTournamentSession(userID int64) Session {
 	return newSession(userID, SessionCreateTournamentProcess)
+}
+
+func NewStartTournamentSession(userID int64) Session {
+	return newSession(userID, SessionStartTournamentProcess)
+}
+
+func NewFinishTournamentSession(userID int64) Session {
+	return newSession(userID, SessionFinishTournamentProcess)
 }
 
 func NewJoinSession(userID int64) Session {

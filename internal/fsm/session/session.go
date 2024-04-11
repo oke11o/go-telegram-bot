@@ -26,6 +26,10 @@ func (s *SessionMachine) Switch(ctx context.Context, state fsm.State) (context.C
 		scm = tournament.NewCreateTournament(s.deps)
 	case model.SessionCreateTournamentSetTitle:
 		scm = tournament.NewCreateTournamentSetTitle(s.deps)
+	case model.SessionStartTournamentProcess:
+		scm = tournament.NewStartChooseTournament(s.deps)
+	case model.SessionFinishTournamentProcess:
+		scm = tournament.NewFinishChooseTournament(s.deps)
 	case model.SessionCreateTournamentSetDate:
 		scm = tournament.NewCreateTournamenSetDate(s.deps)
 	case model.SessionJoinProcess:

@@ -256,3 +256,43 @@ where m.tournament_id = ?`
 	}
 	return users, nil
 }
+
+func (r *Repo) TournamentOpenedAll(ctx context.Context) ([]model.Tournament, error) {
+	q := `select id,title,date,status,created_by,created_at,updated_at from tournament where status=?`
+
+	var tournaments []model.Tournament
+	err := r.db.SelectContext(ctx, &tournaments, q, model.TournamentStatusCreated)
+	if err != nil {
+		return nil, fmt.Errorf("db.SelectContext() err: %w", err)
+	}
+	return tournaments, nil
+}
+
+func (r *Repo) TournamentOpenedByManager(ctx context.Context, userID int64) ([]model.Tournament, error) {
+	q := `select id,title,date,status,created_by,created_at,updated_at from tournament where status=? and created_by=?`
+
+	var tournaments []model.Tournament
+	err := r.db.SelectContext(ctx, &tournaments, q, model.TournamentStatusCreated, userID)
+	if err != nil {
+		return nil, fmt.Errorf("db.SelectContext() err: %w", err)
+	}
+	return tournaments, nil
+}
+
+func (r *Repo) TournamentStart(ctx context.Context, id int64) error {
+	q := `update tournament set status=?, updated_at=? where id=?`
+	_, err := r.db.ExecContext(ctx, q, model.TournamentStatusInProgress, time.Now().Format(time.RFC3339), id)
+	if err != nil {
+		return fmt.Errorf("db.ExecContext() err: %w", err)
+	}
+	return nil
+}
+
+func (r *Repo) TournamentFinish(ctx context.Context, id int64) error {
+	q := `update tournament set status=?, updated_at=? where id=?`
+	_, err := r.db.ExecContext(ctx, q, model.TournamentStatusFinished, time.Now().Format(time.RFC3339), id)
+	if err != nil {
+		return fmt.Errorf("db.ExecContext() err: %w", err)
+	}
+	return nil
+}

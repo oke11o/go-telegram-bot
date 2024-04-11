@@ -66,3 +66,19 @@ func (r *Repo) RemovePlayerFromTournament(ctx context.Context, userID int64, tou
 func (r *Repo) GetTournamentsPlayers(ctx context.Context, tournamentID int64) ([]model.User, error) {
 	panic("implement pg GetTournamentsPlayers()")
 }
+
+func (r *Repo) TournamentOpenedAll(ctx context.Context) ([]model.Tournament, error) {
+	panic("implement pg TournamentOpenedAll()")
+}
+
+func (r *Repo) TournamentOpenedByManager(ctx context.Context, userID int64) ([]model.Tournament, error) {
+	panic("implement pg TournamentOpenedByManager()")
+}
+
+func (r *Repo) TournamentStart(ctx context.Context, id int64) error {
+	panic("implement pg TournamentStart()")
+}
+
+func (r *Repo) TournamentFinish(ctx context.Context, id int64) error {
+	panic("implement pg TournamentFinish()")
+}

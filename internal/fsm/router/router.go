@@ -52,14 +52,14 @@ func (r *Router) GetMachine(ctx context.Context, user model.User, update tgbotap
 }
 
 func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
-	if strings.HasPrefix(update.Message.Text, help.HelpCommand) || strings.HasPrefix(update.Message.Text, StartCommand) {
-		return help.NewHelp(r.deps)
-	}
 	if strings.HasPrefix(update.Message.Text, maintainer.AddAdminCommand) {
 		return maintainer.NewAddAdmin(r.deps)
 	}
 	if strings.HasPrefix(update.Message.Text, maintainer.RemoveAdminCommand) {
 		return maintainer.NewRemoveAdmin(r.deps)
+	}
+	if strings.HasPrefix(update.Message.Text, tournament.StartTournamentCommand) {
+		return tournament.NewStartTournament(r.deps)
 	}
 	if strings.HasPrefix(update.Message.Text, tournament.CreateTournamentCommand) {
 		return tournament.NewCreateTournament(r.deps)
@@ -75,6 +75,9 @@ func (r *Router) resolveCommandMachine(update tgbotapi.Update) fsm.Machine {
 	}
 	if strings.HasPrefix(update.Message.Text, player.MembersCommand) {
 		return player.NewMembers(r.deps)
+	}
+	if strings.HasPrefix(update.Message.Text, help.HelpCommand) || strings.HasPrefix(update.Message.Text, StartCommand) {
+		return help.NewHelp(r.deps)
 	}
 	return nil
 }
