@@ -12,6 +12,7 @@ require (
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/oke11o/wslog v0.1.0
 	github.com/stretchr/testify v1.8.3
 	golang.org/x/sync v0.5.0
 )
