@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/oke11o/wslog"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
 	"github.com/oke11o/go-telegram-bot/internal/config"
-	"github.com/oke11o/go-telegram-bot/internal/logger"
 	"github.com/oke11o/go-telegram-bot/internal/model/iface"
 )
 
@@ -60,7 +62,7 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 	*/
 	for update := range updates {
-		upCtx := logger.AppendCtx(ctx, slog.Int("updateId", update.UpdateID))
+		upCtx := wslog.AppendCtx(ctx, slog.Int("updateId", update.UpdateID))
 		b.logger.DebugContext(upCtx, "got tg update")
 		err = b.handler.HandleUpdate(upCtx, update)
 		if err != nil {

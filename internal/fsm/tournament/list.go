@@ -3,9 +3,10 @@ package tournament
 import (
 	"context"
 	"fmt"
-	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
-	"log/slog"
 	"strings"
+
+	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
@@ -31,7 +32,7 @@ func (m *ListTournament) Switch(ctx context.Context, state fsm.State) (context.C
 
 	tournaments, err := m.Deps.Repo.GetOpenedTournaments(ctx)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant GetOpenedTournaments", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant GetOpenedTournaments", log.Err(err))
 		combineMachine := m.CombineSenderMachines(state, "Something wrong. Try again latter", "Cant get tournament list")
 		return ctx, combineMachine, state, nil
 	}

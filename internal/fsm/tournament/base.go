@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 	"github.com/oke11o/go-telegram-bot/internal/model"
 )
 
@@ -30,14 +30,14 @@ func (m *Base) defaultSwitch(ctx context.Context, state fsm.State, errorMessage 
 		tours, err = m.Deps.Repo.TournamentOpenedByManager(ctx, state.User.ID)
 	}
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "cant get OpenedTournaments", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "cant get OpenedTournaments", log.Err(err))
 		combineMachine := m.CombineSenderMachines(state, "Something wrong. Try again latter", "Cant get tournament list")
 		return ctx, combineMachine, state, nil
 	}
 
 	tourMappingStr, err := json.Marshal(tours)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "cant marshal tourMapping", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "cant marshal tourMapping", log.Err(err))
 		combineMachine := m.CombineSenderMachines(state, "Something wrong. Try again latter", "Cant get tournament list")
 		return ctx, combineMachine, state, nil
 	}
@@ -45,7 +45,7 @@ func (m *Base) defaultSwitch(ctx context.Context, state fsm.State, errorMessage 
 	state.Session.SetArg("tourMapping", string(tourMappingStr))
 	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}

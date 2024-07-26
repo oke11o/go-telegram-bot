@@ -3,9 +3,10 @@ package tournament
 import (
 	"context"
 	"fmt"
-	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
-	"log/slog"
 	"strings"
+
+	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
@@ -44,7 +45,7 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 		ses.SetStatus(model.SessionCreateTournamentSetTitle)
 		_, err := m.Deps.Repo.SaveSession(ctx, ses)
 		if err != nil {
-			m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+			m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 			smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 			return ctx, smc, state, nil
 		}
@@ -56,7 +57,7 @@ func (m *CreateTournament) Switch(ctx context.Context, state fsm.State) (context
 	ses.SetStatus(model.SessionCreateTournamentSetDate)
 	_, err := m.Deps.Repo.SaveSession(ctx, ses)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}

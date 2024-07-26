@@ -1,4 +1,4 @@
-package logger
+package log
 
 import (
 	"log/slog"
@@ -9,3 +9,6 @@ import (
 func New(asJson bool, level slog.Leveler) *slog.Logger {
 	return wslog.New(asJson, level)
 }
+
+var AppendCtx = wslog.AppendCtx
+var Err = wslog.Err

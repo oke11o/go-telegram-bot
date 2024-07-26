@@ -3,11 +3,12 @@ package tournament
 import (
 	"context"
 	"fmt"
+
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 	"github.com/oke11o/go-telegram-bot/internal/model"
-	"log/slog"
 )
 
 func NewCreateTournamentSetTitle(deps *fsm.Deps) *CreateTournamentAskTitle {
@@ -39,7 +40,7 @@ func (m *CreateTournamentAskTitle) Switch(ctx context.Context, state fsm.State) 
 	state.Session.SetStatus(model.SessionCreateTournamentSetDate)
 	ses, err := m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 		return ctx, smc, state, nil //fmt.Errorf("repo.SaveSession() error: %w", err)
 	}

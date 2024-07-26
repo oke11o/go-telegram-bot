@@ -7,8 +7,8 @@ import (
 
 	"github.com/oke11o/go-telegram-bot/internal/app/bot"
 	"github.com/oke11o/go-telegram-bot/internal/config"
-	handler2 "github.com/oke11o/go-telegram-bot/internal/handler"
-	"github.com/oke11o/go-telegram-bot/internal/logger"
+	"github.com/oke11o/go-telegram-bot/internal/handler"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 	"github.com/oke11o/go-telegram-bot/internal/model/iface"
 	"github.com/oke11o/go-telegram-bot/internal/repository/mongo"
 	"github.com/oke11o/go-telegram-bot/internal/repository/pg"
@@ -17,8 +17,8 @@ import (
 )
 
 func Run(ctx context.Context, version string) error {
-	l := logger.New(true, slog.LevelDebug)
-	ctx = logger.AppendCtx(ctx, slog.String("version", version))
+	l := log.New(true, slog.LevelDebug)
+	ctx = log.AppendCtx(ctx, slog.String("version", version))
 	err := config.InitDotEnv()
 	if err != nil {
 		l.ErrorContext(ctx, "error config.InitDotEnv()", slog.String("error", err.Error()))
@@ -47,7 +47,7 @@ func Run(ctx context.Context, version string) error {
 		return fmt.Errorf("unknown db_type %s", cfg.DBType)
 	}
 	income := service.NewIncomeServce(repo)
-	b := bot.NewBot(cfg, l, handler2.New(cfg, l, income, repo))
+	b := bot.NewBot(cfg, l, handler.New(cfg, l, income, repo))
 	err = b.Run(ctx)
 	if err != nil {
 		l.ErrorContext(ctx, "error bot.Run()", slog.String("error", err.Error()))

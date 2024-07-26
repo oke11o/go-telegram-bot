@@ -3,11 +3,13 @@ package tournament
 import (
 	"context"
 	"fmt"
+	"log/slog"
+
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 	"github.com/oke11o/go-telegram-bot/internal/model"
-	"log/slog"
 )
 
 func NewCreateTournamenSetDate(deps *fsm.Deps) *CreateTournamentAskDate {
@@ -39,7 +41,7 @@ func (m *CreateTournamentAskDate) Switch(ctx context.Context, state fsm.State) (
 
 	ses, err := m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session %d", state.Session.ID))
 		return ctx, smc, state, nil
 	}
@@ -53,14 +55,14 @@ func (m *CreateTournamentAskDate) Switch(ctx context.Context, state fsm.State) (
 	tournament := model.NewTournament(title, date, state.User.ID)
 	tournament, err = m.Deps.Repo.SaveTournament(ctx, tournament)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save tournament", slog.String("error", err.Error()), slog.Int64("session_id", state.Session.ID))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save tournament", log.Err(err), slog.Int64("session_id", state.Session.ID))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save tournament for session %d", state.Session.ID))
 		return ctx, smc, state, nil
 	}
 
 	err = m.Deps.Repo.CloseSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant close session", slog.String("error", err.Error()), slog.Int64("session_id", state.Session.ID))
+		m.Deps.Logger.ErrorContext(ctx, "Cant close session", log.Err(err), slog.Int64("session_id", state.Session.ID))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session %d", state.Session.ID))
 		return ctx, smc, state, nil
 	}

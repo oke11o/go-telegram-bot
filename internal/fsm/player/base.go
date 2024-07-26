@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
-	"github.com/oke11o/go-telegram-bot/internal/logger"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 	"github.com/oke11o/go-telegram-bot/internal/model"
 	"github.com/oke11o/go-telegram-bot/internal/model/iface"
 )
@@ -39,17 +40,17 @@ func (m *Base) MembersSwitch(ctx context.Context, state fsm.State, errorMessage 
 }
 
 func (m *Base) defaultSwitch(ctx context.Context, state fsm.State, errorMessage string, verb string, getter tournamentGetter) (context.Context, fsm.Machine, fsm.State, error) {
-	ctx = logger.AppendCtx(ctx, slog.String("verb", verb), slog.String("errorMessage", errorMessage))
+	ctx = log.AppendCtx(ctx, slog.String("verb", verb), log.Err(errors.New(errorMessage)))
 	tours, tourMapping, err := getter(ctx, m.Deps.Repo, state.User.ID)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "cant get opened tournaments", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "cant get opened tournaments", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("cant get tournaments for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}
 	if len(tours) == 0 {
 		err := m.Deps.Repo.CloseSession(ctx, state.Session)
 		if err != nil {
-			m.Deps.Logger.ErrorContext(ctx, "Cant close session", slog.String("error", err.Error()))
+			m.Deps.Logger.ErrorContext(ctx, "Cant close session", log.Err(err))
 			smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant close session for user %s", state.User.Username))
 			return ctx, smc, state, nil
 		}
@@ -60,7 +61,7 @@ func (m *Base) defaultSwitch(ctx context.Context, state fsm.State, errorMessage 
 	state.Session.SetArg("tourMapping", tourMapping)
 	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}

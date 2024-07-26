@@ -3,14 +3,15 @@ package handler
 import (
 	"context"
 	"fmt"
+	"log/slog"
+
 	"github.com/oke11o/go-telegram-bot/internal/config"
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/router"
-	"log/slog"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	"github.com/oke11o/go-telegram-bot/internal/logger"
 	"github.com/oke11o/go-telegram-bot/internal/model"
 	"github.com/oke11o/go-telegram-bot/internal/model/iface"
 	"github.com/oke11o/go-telegram-bot/pgk/utils/str"
@@ -43,14 +44,14 @@ func (h *Handler) SetSender(sender iface.Sender) {
 
 func (h *Handler) HandleUpdate(ctx context.Context, update tgbotapi.Update) error {
 	requestID := fmt.Sprintf("%s-%d", str.RandStringRunes(32, ""), update.UpdateID)
-	ctx = logger.AppendCtx(ctx, slog.String("request_id", requestID))
+	ctx = log.AppendCtx(ctx, slog.String("request_id", requestID))
 
 	user, err := h.income.Income(ctx, requestID, update)
 	if err != nil {
 		h.logger.ErrorContext(ctx, "income.Income Error", err)
 		return fmt.Errorf("income.Income() err: %w", err)
 	}
-	ctx = logger.AppendCtx(ctx, slog.Int64("user_id", user.ID))
+	ctx = log.AppendCtx(ctx, slog.Int64("user_id", user.ID))
 
 	deps := fsm.NewDeps(h.cfg, h.repo, h.sender, h.logger)
 	routr, err := router.NewRouter(deps)

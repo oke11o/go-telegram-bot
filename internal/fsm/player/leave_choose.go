@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/base"
 	"github.com/oke11o/go-telegram-bot/internal/fsm/sender"
+	"github.com/oke11o/go-telegram-bot/internal/log"
 )
 
 func NewLeaveChoose(deps *fsm.Deps) *LeaveChoose {
@@ -46,21 +46,21 @@ func (m *LeaveChoose) Switch(ctx context.Context, state fsm.State) (context.Cont
 	state.Session.SetArg("choose", strconv.FormatInt(choose, 10))
 	state.Session, err = m.Deps.Repo.SaveSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant save session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant save session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant save session for user %s", state.User.Username))
 		return ctx, smc, state, nil
 	}
 
 	err = m.Deps.Repo.RemovePlayerFromTournament(ctx, state.User.ID, mapping[choose].ID)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant add player to tournament", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant add player to tournament", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant add player to tournament for user @%s", state.User.Username))
 		return ctx, smc, state, nil
 	}
 
 	err = m.Deps.Repo.CloseSession(ctx, state.Session)
 	if err != nil {
-		m.Deps.Logger.ErrorContext(ctx, "Cant close session", slog.String("error", err.Error()))
+		m.Deps.Logger.ErrorContext(ctx, "Cant close session", log.Err(err))
 		smc := m.CombineSenderMachines(state, "Something wrong. Try again latter", fmt.Sprintf("Cant close session for user @%s", state.User.Username))
 		return ctx, smc, state, nil
 	}

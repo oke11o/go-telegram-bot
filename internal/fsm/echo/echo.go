@@ -4,7 +4,10 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/oke11o/go-telegram-bot/internal/log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
 	"github.com/oke11o/go-telegram-bot/internal/fsm"
 )
 
@@ -27,7 +30,7 @@ func (s *Echo) Switch(ctx context.Context, state fsm.State) (context.Context, fs
 
 		respMsg, err := s.deps.Sender.Send(msg)
 		if err != nil {
-			s.deps.Logger.ErrorContext(ctx, "sender.Send", slog.String("error", err.Error()))
+			s.deps.Logger.ErrorContext(ctx, "sender.Send", log.Err(err))
 		} else {
 			s.deps.Logger.DebugContext(ctx, "sender.Send", slog.Any("response", respMsg))
 		}
